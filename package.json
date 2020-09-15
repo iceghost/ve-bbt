@@ -1,0 +1,12 @@
+{
+  "name": "bangbienthienv2",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "elm-live src/Main.elm --hot --host=0.0.0.0 -- --debug --output=public/elm.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
