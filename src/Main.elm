@@ -3,7 +3,7 @@ port module Main exposing (main)
 import Browser
 import Html exposing (..)
 import Html.Attributes as Attr exposing (class, href, id, target)
-import Html.Events exposing (onInput)
+import Html.Events exposing (onClick, onInput)
 import Icon
 import Process
 import Table exposing (Problem(..), Row(..))
@@ -13,13 +13,24 @@ import Task
 port output : String -> Cmd msg
 
 
+port sendCopy : String -> Cmd msg
+
+
 type Msg
     = GotInput String
+    | Copy
+    | ResetCopy
+
+
+type CopyState
+    = Idle
+    | Copied
 
 
 type alias Model =
     { rawInput : String
     , output : String
+    , copy : CopyState
     }
 
 
@@ -39,17 +50,17 @@ main =
     Browser.element
         { init =
             \_ ->
-                ( Model "" ""
+                ( Model "" "" Idle
                 , Task.perform
                     (\_ ->
                         GotInput
                             (sampleTable
                                 |> List.head
-                                |> Maybe.withDefault ("", "")
+                                |> Maybe.withDefault ( "", "" )
                                 |> Tuple.second
                             )
                     )
-                    (Process.sleep 100)
+                    (Process.sleep 0)
                 )
         , view = view
         , update = update
@@ -57,7 +68,7 @@ main =
         }
 
 
-update : Msg -> Model -> ( Model, Cmd msg )
+update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         GotInput newInput ->
@@ -68,10 +79,25 @@ update msg model =
             , output (newInput |> outputPipe)
             )
 
+        Copy ->
+            ( { model | copy = Copied }
+            , Cmd.batch
+                [ Task.perform
+                    (\_ ->
+                        ResetCopy
+                    )
+                    (Process.sleep 2000)
+                , sendCopy model.output
+                ]
+            )
+
+        ResetCopy ->
+            ( { model | copy = Idle }, Cmd.none )
+
 
 view : Model -> Html Msg
 view model =
-    div [ class "flex flex-col justify-between font-body border-t-8 border-indigo-800\n  min-h-screen w-screen bg-orange-300" ]
+    div [ class "flex flex-col justify-between font-body border-t-8 border-indigo-800", class "min-h-screen w-screen bg-orange-300" ]
         [ main_ [ class "mx-auto w-auto px-10 bg-white py-4" ]
             [ h1 [ class "text-indigo-900 text-3xl font-bold text-center" ]
                 [ text "Tạo bảng biến thiên bằng LaTeX" ]
@@ -110,17 +136,43 @@ view model =
                     ]
                 , div [ class "ml-1 w-5 h-5" ] [ Icon.download ]
                 ]
+            , button
+                [ class "mx-auto bg-orange-500 text-white w-32 p-1 rounded-full flex"
+                , class "items-center justify-center mt-2 border border-orange-500 hover:bg-white"
+                , class "hover:text-orange-500 transition-colors duration-100 ease-in-out"
+                , onClick Copy
+                ]
+                [ span []
+                    [ text
+                        (if model.copy == Idle then
+                            "Copy mã"
+
+                         else
+                            "Đã copy!"
+                        )
+                    ]
+                , div [ class "ml-1 w-5 h-5" ] [ Icon.copyToClipboard ]
+                ]
             ]
-        , footer [ class "grid grid-cols-1 divide-y divide-indigo-300 p-2 grid-rows-2\n    bg-indigo-800 text-white" ]
+        , footer
+            [ class "grid grid-cols-1 divide-y divide-indigo-300 p-2 grid-rows-2"
+            , class "bg-indigo-800 text-white"
+            ]
             [ span [ class "mx-auto py-2" ]
-                [ span [ class "flex items-center space-x-1" ]
+                [ a
+                    [ class "flex items-center space-x-1"
+                    , href "https://diendan.hocmai.vn/threads/ve-bang-bien-thien-tren-dien-dan.813437/"
+                    , target "_blank"
+                    ]
                     [ span []
                         [ text "Hướng dẫn" ]
                     , div [ class "ml-1 w-5 h-5" ] [ Icon.questionMark ]
                     ]
                 ]
             , span [ class "mx-auto font-light italic pt-2" ]
-                [ text "Made with love by iceghost    " ]
+                [ text "Made with love by "
+                , a [ href "https://github.com/iceghosttth/ve-bbt" ] [ text "iceghost" ]
+                ]
             ]
         ]
 

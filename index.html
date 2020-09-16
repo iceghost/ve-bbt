@@ -4,6 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Bảng biến thiên</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fira+Sans:ital,wght@0,400;1,200;1,400;1,600&display=swap"
+      rel="stylesheet"
+    />
     <link rel="shortcut icon" href="public/favicon.ico" type="image/x-icon" />
     <link rel="stylesheet" href="public/style.css" />
     <script>
@@ -23,7 +27,7 @@
       type="text/javascript"
       id="MathJax-script"
       async
-      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"
     ></script>
   </head>
   <body>
@@ -34,6 +38,14 @@
       app.ports.output.subscribe((output) => {
         document.querySelector("#output").innerHTML = output;
         if (typeof MathJax.typeset === "function") MathJax.typeset(["#output"]);
+      });
+      app.ports.sendCopy.subscribe((output) => {
+        let dummy = document.createElement("textarea");
+        document.body.appendChild(dummy);
+        dummy.value = output;
+        dummy.select();
+        document.execCommand("copy");
+        document.body.removeChild(dummy);
       });
     </script>
   </body>

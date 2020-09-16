@@ -4,7 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "elm-live src/Main.elm --hot --host=0.0.0.0 -- --debug --output=public/elm.js"
+    "dev": "npm run build:tailwind && elm-live src/Main.elm --hot --host=0.0.0.0 -- --debug --output=public/elm.js",
+    "build:env": "set NODE_ENV=production",
+    "build:elm": "elm make src/Main.elm --optimize --output=public/elm.js",
+    "build:tailwind": "npx tailwindcss build -o public/style.css",
+    "build": "npm run build:elm && npm run build:tailwind"
   },
   "keywords": [],
   "author": "",

@@ -3,10 +3,18 @@ module.exports = {
     removeDeprecatedGapUtilities: true,
     purgeLayersByDefault: true,
   },
-  purge: { enabled: true, content: ["src/Main.elm"], },
+  purge: {
+    // enabled: true,
+    content: ["src/Main.elm"],
+  },
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        'body': ['"Fira Sans"', 'sans-serif']
+      }
+    },
   },
   variants: {},
   plugins: [],
+  experimental: 'all',
 }
